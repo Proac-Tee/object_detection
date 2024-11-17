@@ -201,6 +201,7 @@ function postprocessYolov10(
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+  const alertClasses = ["cell phone", "car", "knife"];
   let x0, y0, x1, y1, cls_id;
 
   let score: string | number | bigint;
@@ -228,6 +229,13 @@ function postprocessYolov10(
       " " +
       score.toString() +
       "%";
+
+    if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
+      // Log the detected class and confidence score
+      const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
+      readOutAlert(word);
+    }
+
     const color = conf2color(score / 100);
 
     ctx.strokeStyle = color;
@@ -254,6 +262,7 @@ function postprocessYolov7(
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+  const alertClasses = ["cell phone", "car", "knife"];
   let batch_id, x0, y0, x1, y1, cls_id, score;
   for (let i = 0; i < tensor.dims[0]; i++) {
     [batch_id, x0, y0, x1, y1, cls_id, score] = tensor.data.slice(
@@ -276,6 +285,13 @@ function postprocessYolov7(
       " " +
       score.toString() +
       "%";
+
+    if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
+      // Log the detected class and confidence score
+      const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
+      readOutAlert(word);
+    }
+
     const color = conf2color(score / 100);
 
     ctx.strokeStyle = color;
@@ -289,4 +305,15 @@ function postprocessYolov7(
     ctx.fillStyle = color.replace(")", ", 0.2)").replace("rgb", "rgba");
     ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
   }
+}
+
+function readOutAlert(message: string) {
+  const synth = window.speechSynthesis;
+  if (synth.speaking) {
+    console.log("Stopping ongoing speech...");
+    synth.cancel();
+  }
+
+  const utterance = new SpeechSynthesisUtterance(message);
+  synth.speak(utterance);
 }

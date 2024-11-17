@@ -2,6 +2,7 @@ import Webcam from "react-webcam";
 import { useRef, useState, useEffect } from "react";
 import { InferenceSession, Tensor } from "onnxruntime-web";
 import * as runModelUtils from "../app/utils/runModel";
+import Loading from "./Loading";
 
 const ObjectDetectionCamera = (props: {
   width: number;
@@ -131,7 +132,7 @@ const ObjectDetectionCamera = (props: {
   }, []);
 
   if (SSR) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
