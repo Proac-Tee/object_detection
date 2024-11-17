@@ -1,7 +1,7 @@
 "use client";
 import { InferenceSession, Tensor } from "onnxruntime-web";
 import { round } from "lodash";
-import { FC, useState } from "react";
+import {  useState } from "react";
 import { useEffect } from "react";
 import * as runModelUtils from "../utils/runModel";
 import ObjectDetectionCamera from "./ObjectDetectionCamera";
