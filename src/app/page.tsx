@@ -1,11 +1,9 @@
-import LandingPage from "./components/LandingPage";
+import LandingPage from "@/components/LandingPage";
 
 export default function Home() {
   return (
-    <div className={``}>
-      <main className={``}>
-        <LandingPage />
-      </main>
-    </div>
+    <main>
+      <LandingPage />
+    </main>
   );
 }
