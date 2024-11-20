@@ -310,7 +310,6 @@ function postprocessYolov7(
 function readOutAlert(message: string) {
   const synth = window.speechSynthesis;
   if (synth.speaking) {
-    console.log("Stopping ongoing speech...");
     synth.cancel();
   }
 

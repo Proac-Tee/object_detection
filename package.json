@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "firebase": "^11.0.2",
     "lodash": "^4.17.21",
     "ndarray": "^1.0.19",
     "ndarray-ops": "^1.2.2",
