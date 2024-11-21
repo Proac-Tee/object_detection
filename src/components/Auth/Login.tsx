@@ -1,7 +1,56 @@
-import React from "react";
+"use client";
+import React, { useRef, useState } from "react";
 import singin_image from "../../app/assets/signin.jpg";
 import Image from "next/image";
+import Link from "next/link";
+import { useAuth } from "@/app/context/AuthContext";
+import { SignInErrors } from "@/app/utils/types";
+import { useRouter } from "next/navigation";
+import { signInSchema } from "@/app/lib/types";
+import toast from "react-hot-toast";
+import Button from "./Button";
 const Login = () => {
+  const [error, setError] = useState<string>("");
+  const [formErrors, setFormErrors] = useState<SignInErrors>({});
+  const ref = useRef<HTMLFormElement>(null);
+
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const formhandler = async (formData: FormData) => {
+    try {
+      setError("");
+      // Convert FormData to a plain object for client side validation
+      const data: { [key: string]: string } = {};
+      formData.forEach((value, key) => {
+        data[key] = value as string;
+      });
+
+      const result = signInSchema.safeParse(data);
+      if (!result.success) {
+        const errorObj: { [key: string]: string } = {};
+
+        result.error.issues.forEach((issue) => {
+          const fieldName = issue.path[0];
+          errorObj[fieldName] = issue.message;
+        });
+
+        setFormErrors(errorObj);
+
+        return;
+      } else {
+        await login(result.data.loginEmailAddress, result.data.loginPassword);
+
+        router.replace(`/dashboard`);
+
+        ref.current?.reset();
+      }
+    } catch (error: any) {
+      toast.error("Incorrect login credentials."); // Displays an error
+      setError("Incorrect login credentials.");
+    }
+  };
+
   return (
     <section className="bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -9,10 +58,12 @@ const Login = () => {
           <div className="absolute inset-0">
             <Image
               src={singin_image}
-              alt="Sing up image"
-              layout="fill"
-              objectFit="cover"
-              objectPosition="top"
+              alt="Sign in image"
+              fill
+              sizes="(min-width: 768px) 100vw, 700px"
+              placeholder="blur"
+              className="top-1 object-cover"
+              priority
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
@@ -107,21 +158,25 @@ const Login = () => {
 
         <div className="flex items-center justify-center px-4 py-10 bg-white sm:px-6 lg:px-8 sm:py-16 lg:py-24">
           <div className="xl:w-full xl:max-w-sm 2xl:max-w-md xl:mx-auto">
+            {error && (
+              <p className="w-[100%] p-[0.5rem] m-auto flex justify-center items-center text-red-500 bg-red-200 rounded-sm my-[0.5rem]">
+                {error}
+              </p>
+            )}
             <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl">
               Sign in to Dashboard
             </h2>
             <p className="mt-2 text-base text-gray-600">
               Don&apos;t have an account?
-              <a
-                href="#"
-                title=""
+              <Link
+                href={`/sign-up`}
                 className="font-medium ml-2 text-blue-600 transition-all duration-200 hover:text-blue-700 focus:text-blue-700 hover:underline"
               >
                 Create a free account
-              </a>
+              </Link>
             </p>
 
-            <form action="#" method="POST" className="mt-8">
+            <form action={formhandler} className="mt-8">
               <div className="space-y-5">
                 <div>
                   <label
@@ -150,11 +205,14 @@ const Login = () => {
 
                     <input
                       type="email"
-                      name=""
-                      id=""
+                      name="loginEmailAddress"
+                      id="loginEmailAddress"
                       placeholder="Enter email to get started"
                       className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-blue-600 focus:bg-white caret-blue-600"
                     />
+                    <p className="text-[0.75rem] text-red-500 pt-[0.2rem] ">
+                      {formErrors.loginEmailAddress}
+                    </p>
                   </div>
                 </div>
 
@@ -195,21 +253,19 @@ const Login = () => {
 
                     <input
                       type="password"
-                      name=""
-                      id=""
+                      name="loginPassword"
+                      id="loginPassword"
                       placeholder="Enter your password"
                       className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-blue-600 focus:bg-white caret-blue-600"
                     />
+                    <p className="text-[0.75rem] text-red-500 pt-[0.2rem] ">
+                      {formErrors.loginPassword}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md bg-gradient-to-r from-fuchsia-600 to-blue-600 focus:outline-none hover:opacity-80 focus:opacity-80"
-                  >
-                    Log in
-                  </button>
+                  <Button name="Log in" />
                 </div>
               </div>
             </form>

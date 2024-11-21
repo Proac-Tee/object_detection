@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
+import AuthProvider from "./context/AuthContext";
 
 const raleway = Raleway({ subsets: ["latin"] });
 
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={raleway.className}>
-        <Header />
-        <Toaster position="top-center" />
-        {children}
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <Toaster position="top-center" />
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
