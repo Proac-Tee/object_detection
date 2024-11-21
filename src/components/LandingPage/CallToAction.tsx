@@ -1,7 +1,17 @@
+"use client";
+import { useAuth } from "@/app/context/AuthContext";
 import Link from "next/link";
 import React from "react";
 
 const CallToAction = () => {
+  const { currentUser } = useAuth();
+
+  let displayName: string = "";
+
+  if (currentUser && currentUser.displayName) {
+    displayName = currentUser.displayName.split(" ")[0].trim() || "";
+  }
+
   return (
     <section className="py-10 bg-gray-100 sm:py-16 lg:py-24">
       <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
@@ -42,15 +52,24 @@ const CallToAction = () => {
             </Link>
           </div>
 
-          <p className="mt-6 text-base text-black">
-            Already have an account?
-            <Link
-              href={`/login`}
-              className="text-orange-500 transition-all duration-200 hover:text-orange-700 hover:underline"
-            >
-              Log in
-            </Link>
-          </p>
+          {currentUser ? (
+            <p className="mt-6 text-base text-black">
+              Welcome
+              <span className="pl-2 text-orange-500 transition-all duration-200">
+                {displayName}
+              </span>
+            </p>
+          ) : (
+            <p className="mt-6 text-base text-black">
+              Already have an account?
+              <Link
+                href={`/login`}
+                className="pl-2 text-orange-500 transition-all duration-200 hover:text-orange-700 hover:underline"
+              >
+                Log in
+              </Link>
+            </p>
+          )}
         </div>
       </div>
     </section>
