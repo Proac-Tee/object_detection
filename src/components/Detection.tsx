@@ -1,7 +1,7 @@
 "use client";
 import { InferenceSession, Tensor } from "onnxruntime-web";
 import { round } from "lodash";
-import { useState } from "react";
+import { RefObject, useRef, useState } from "react";
 import { useEffect } from "react";
 import * as runModelUtils from "../app/utils/runModel";
 import ObjectDetectionCamera from "./ObjectDetectionCamera";
@@ -10,6 +10,9 @@ import ndarray from "ndarray";
 import ops from "ndarray-ops";
 import Loading from "./Loading";
 import toast from "react-hot-toast";
+import html2canvas from "html2canvas";
+import { captureScreenshot } from "@/app/utils/captureScreenshot";
+import { uploadFiles } from "@/app/utils/upload";
 
 // Define a type for the model resolution and name mapping
 type ModelResolution = [number[], string];
@@ -27,6 +30,42 @@ const Detection = (props: any) => {
   const [modelName, setModelName] = useState<string>(RES_TO_MODEL[0][1]);
   const [session, setSession] = useState<InferenceSession | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [screenshot, setScreenshot] = useState<string | null>(null);
+
+  const handleCapture = async () => {
+    try {
+      // Capture the screenshot
+      const dataURL = await captureScreenshot(captureRef);
+      if (!dataURL) {
+        toast.success("Failed to capture screenshot.");
+        return;
+      }
+
+      // Convert the Data URL to a File
+      const file = dataURLtoFile(dataURL, "screenshot.png");
+
+      // Upload the file
+      const response = await uploadFiles("imageUploader", { files: [file] });
+      toast.success("Anormaly captured successfully");
+    } catch (error) {
+      toast.error(`Error during anormaly capture`);
+    }
+  };
+
+  // Helper function to convert Data URL to File
+  const dataURLtoFile = (dataURL: string, filename: string): File => {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
 
   useEffect(() => {
     const getSession = async () => {
@@ -164,10 +203,16 @@ const Detection = (props: any) => {
     // Output tensor of yolov7-tiny is [det_num, 7] while yolov10n is [1, all_boxes, 6]
     // Thus we need to handle them differently
     if (modelName === "yolov10n.onnx") {
-      postprocessYolov10(ctx, modelResolution, tensor, conf2color);
+      postprocessYolov10(
+        ctx,
+        modelResolution,
+        tensor,
+        conf2color,
+        handleCapture
+      );
       return;
     }
-    postprocessYolov7(ctx, modelResolution, tensor, conf2color);
+    postprocessYolov7(ctx, modelResolution, tensor, conf2color, handleCapture);
   };
 
   if (!session || loading) {
@@ -175,17 +220,19 @@ const Detection = (props: any) => {
   }
 
   return (
-    <ObjectDetectionCamera
-      width={props.width}
-      height={props.height}
-      preprocess={preprocess}
-      postprocess={postprocess}
-      // resizeCanvasCtx={resizeCanvasCtx}
-      session={session}
-      changeCurrentModelResolution={changeModelResolution}
-      currentModelResolution={modelResolution}
-      modelName={modelName}
-    />
+    <div ref={captureRef}>
+      <ObjectDetectionCamera
+        width={props.width}
+        height={props.height}
+        preprocess={preprocess}
+        postprocess={postprocess}
+        // resizeCanvasCtx={resizeCanvasCtx}
+        session={session}
+        changeCurrentModelResolution={changeModelResolution}
+        currentModelResolution={modelResolution}
+        modelName={modelName}
+      />
+    </div>
   );
 };
 
@@ -194,7 +241,8 @@ function postprocessYolov10(
   ctx: CanvasRenderingContext2D,
   modelResolution: number[],
   tensor: Tensor,
-  conf2color: (conf: number) => string
+  conf2color: (conf: number) => string,
+  handleCapture: () => void
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
@@ -233,7 +281,11 @@ function postprocessYolov10(
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
       // Log the detected class and confidence score
       const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
-      readOutAlert(word);
+      // Run handleCapture and readOutAlert together
+      Promise.allSettled([
+        handleCapture(), // Asynchronous screenshot capture
+        readOutAlert(word), // Asynchronous alert
+      ]);
     }
 
     const color = conf2color(score / 100);
@@ -255,7 +307,8 @@ function postprocessYolov7(
   ctx: CanvasRenderingContext2D,
   modelResolution: number[],
   tensor: Tensor,
-  conf2color: (conf: number) => string
+  conf2color: (conf: number) => string,
+  handleCapture: () => void
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
@@ -289,7 +342,11 @@ function postprocessYolov7(
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
       // Log the detected class and confidence score
       const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
-      readOutAlert(word);
+      // Run handleCapture and readOutAlert together
+      Promise.allSettled([
+        handleCapture(), // Asynchronous screenshot capture
+        readOutAlert(word), // Asynchronous alert
+      ]);
     }
 
     const color = conf2color(score / 100);

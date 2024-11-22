@@ -132,11 +132,11 @@ const Header = () => {
           ) : (
             <div
               ref={dropdownRef}
-              className="relative items-center justify-center hidden px-4 py-3 ml-10 text-base font-semibold text-black transition-all duration-200 rounded-md md:inline-flex bg-white border-[1px] border-gray-800 hover:border-orange-500"
+              className="relative items-center justify-center hidden px-4 py-3 ml-10 text-base font-semibold text-black transition-all duration-200 rounded-md md:inline-flex bg-white border-[1px] border-gray-800 hover:border-orange-500 max-w-[150px]"
             >
               <button
                 onClick={handleUserProfile}
-                className="flex justify-between gap-[0.3rem] items-center font-[600] text-primary_black"
+                className="flex justify-between gap-[0.3rem] truncate items-center font-[600] text-primary_black"
               >
                 {displayName}
                 <span>
