@@ -1,15 +1,16 @@
 "use client";
-import React from "react";
+import React, { FC } from "react";
 import Dropdown from "./Dropdown";
 import { useAuth } from "@/app/context/AuthContext";
 import { getImageFiles } from "@/app/action/action";
-import { FilesArrayType } from "@/app/utils/types";
+import { DashboardProps, FilesArrayType } from "@/app/utils/types";
 import { useQuery } from "@tanstack/react-query";
-import Skeleton from "./Skeleton";
+import Skeleton from "../../app/utils/Skeleton";
 import Image from "next/image";
 import loading_image from "../../app/assets/loading.svg";
+import DashobardPagination from "@/app/utils/DashobardPagination";
 
-const Table = () => {
+const Table: FC<DashboardProps> = ({ page, per_page }) => {
   const { loading, currentUser, dropdownId, setDropdownId, setImageKey } =
     useAuth();
 
@@ -38,6 +39,10 @@ const Table = () => {
     setDropdownId((prevId) => (prevId === productId ? "" : productId));
     setImageKey((prev) => (prev === key ? "" : key));
   };
+
+  // Calculate pagination values
+  const start = (Number(page) - 1) * Number(per_page);
+  const end = start + Number(per_page);
 
   if (filesLoading)
     return (
@@ -157,6 +162,11 @@ const Table = () => {
                 </div>
               </section>
             </section>
+            <DashobardPagination
+              totalEntries={fetchedFile}
+              hasNextPage={end < fetchedFile.length}
+              hasPrevPage={start > 0}
+            />
           </section>
         </>
       ) : (

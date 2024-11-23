@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "./context/AuthContext";
 import Providers from "./utils/Provider";
-import Modal from "@/components/Dashboard/Modal";
+import Modal from "@/app/utils/Modal";
 
 const raleway = Raleway({ subsets: ["latin"] });
 

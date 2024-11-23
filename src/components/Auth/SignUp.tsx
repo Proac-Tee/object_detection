@@ -7,7 +7,7 @@ import Button from "./Button";
 import { signUpSchema } from "@/app/lib/types";
 import toast from "react-hot-toast";
 import { useAuth } from "@/app/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const SignUp = () => {
@@ -17,6 +17,10 @@ const SignUp = () => {
   const [submitError, setSubmitError] = useState<string>("");
 
   const { signup, updateuserProfile } = useAuth();
+
+  // Retrieve the query parameters
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "/detection";
 
   const formhandler = async (formData: FormData) => {
     try {
@@ -62,7 +66,7 @@ const SignUp = () => {
             // Navigate to the desired page
             setFormErrors({});
             // Continue with navigation  logic
-            router.replace(`/dashboard`);
+            router.replace(redirectTo);
           }
         }
       }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import { SignInErrors } from "@/app/utils/types";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signInSchema } from "@/app/lib/types";
 import toast from "react-hot-toast";
 import Button from "./Button";
@@ -16,6 +16,10 @@ const Login = () => {
 
   const { login } = useAuth();
   const router = useRouter();
+
+  // Retrieve the query parameters
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "/detection";
 
   const formhandler = async (formData: FormData) => {
     try {
@@ -41,7 +45,7 @@ const Login = () => {
       } else {
         await login(result.data.loginEmailAddress, result.data.loginPassword);
 
-        router.replace(`/dashboard`);
+        router.replace(redirectTo);
 
         ref.current?.reset();
       }
@@ -225,13 +229,12 @@ const Login = () => {
                       Password
                     </label>
 
-                    <a
-                      href="#"
-                      title=""
+                    <Link
+                      href={`/forgot-password`}
                       className="text-sm font-medium text-blue-600 transition-all duration-200 hover:text-blue-700 focus:text-blue-700 hover:underline"
                     >
                       Forgot password?
-                    </a>
+                    </Link>
                   </div>
                   <div className="mt-2.5 relative text-gray-400 focus-within:text-gray-600">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

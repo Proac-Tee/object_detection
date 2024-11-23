@@ -2,7 +2,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import Image from "next/image";
 import React from "react";
-import DeleteImage from "./DeleteImage";
+import DeleteImage from "../../components/Dashboard/DeleteImage";
 
 const Modal = () => {
   const { imageKey, modalId, setModalId } = useAuth();

@@ -43,3 +43,9 @@ export const signInSchema = z.object({
       message: "Password must be at most 50 characters long.",
     }),
 });
+
+export const forgotPasswordSchema = z.object({
+  forgot_email: z.string().email({
+    message: "Please enter a valid email.",
+  }),
+});

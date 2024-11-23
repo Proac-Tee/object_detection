@@ -38,3 +38,18 @@ export type FilesArrayType = {
   files: FileType[]; // Array of file objects
   hasMore: boolean; // hasMore is a boolean indicating if there are more files
 };
+
+export interface DashboardPaginationProps {
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  totalEntries: any;
+}
+
+export interface DashboardProps {
+  page: number | string;
+  per_page: number;
+}
+
+export type ForgotPasswordErrors = {
+  email?: string;
+};
