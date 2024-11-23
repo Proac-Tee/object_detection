@@ -23,3 +23,18 @@ export interface SignInErrors {
 export interface ButtonProps {
   name: string;
 }
+
+// Define the type for each file object
+export type FileType = {
+  customId: string | null; // customId can be null or a string
+  id: string; // id is a string
+  key: string; // key is a string
+  name: string; // name is a string
+  status: "Uploaded"; // status is a string, specifically "Uploaded"
+};
+
+// Define the type for the array of files
+export type FilesArrayType = {
+  files: FileType[]; // Array of file objects
+  hasMore: boolean; // hasMore is a boolean indicating if there are more files
+};

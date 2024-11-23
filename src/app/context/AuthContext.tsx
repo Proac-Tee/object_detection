@@ -18,7 +18,6 @@ import {
   updateEmail,
 } from "firebase/auth";
 
-import toast from "react-hot-toast";
 import { auth } from "../firebase/auth_config";
 
 interface UserData {
@@ -37,6 +36,12 @@ type AuthContextProps = {
   logout: any;
   updateuserProfile: (currentUser: User, displayName: string) => Promise<any>;
   resetPassword: (email: string) => Promise<any>; // Update the type accordingly
+  dropdownId: string;
+  setDropdownId: React.Dispatch<React.SetStateAction<string>>;
+  imageKey: string;
+  setImageKey: React.Dispatch<React.SetStateAction<string>>;
+  modalId: string;
+  setModalId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -56,7 +61,11 @@ export function useAuth() {
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null | false>(false);
 
+  const [dropdownId, setDropdownId] = useState<string>("");
+
   const [loading, setLoading] = useState<boolean>(false);
+  const [imageKey, setImageKey] = useState<string>("");
+  const [modalId, setModalId] = useState<string>("");
 
   //   user login function
   const login = (email: string, password: string) => {
@@ -106,6 +115,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     loading,
     updateuserProfile,
+    dropdownId,
+    setDropdownId,
+    imageKey,
+    setImageKey,
+    modalId,
+    setModalId,
   };
 
   return (

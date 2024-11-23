@@ -1,3 +1,5 @@
+"use client";
+import { useAuth } from "@/app/context/AuthContext";
 import React, { FC } from "react";
 
 interface DashboardProps {
@@ -5,9 +7,14 @@ interface DashboardProps {
 }
 
 const Dropdown: FC<DashboardProps> = ({ _id }) => {
-  const viewImageHandler = () => {};
+  const { setModalId } = useAuth();
+  const viewImageHandler = () => {
+    setModalId(`viewImage`);
+  };
 
-  const deleteImageHandler = () => {};
+  const deleteImageHandler = () => {
+    setModalId(`deleteImage`);
+  };
 
   return (
     <section>

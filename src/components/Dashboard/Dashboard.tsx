@@ -1,5 +1,4 @@
 import React from "react";
-import Skeleton from "./Skeleton";
 import Table from "./Table";
 
 const Dashboard = () => {

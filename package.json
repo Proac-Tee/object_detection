@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.61.0",
     "@uploadthing/react": "^7.1.1",
     "firebase": "^11.0.2",
     "html2canvas": "^1.4.1",
