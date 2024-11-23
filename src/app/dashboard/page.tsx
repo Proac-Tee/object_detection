@@ -14,7 +14,7 @@ const DashboardPage = ({
   return (
     <Suspense
       fallback={
-        <div className="w-[100%] flex justify-center items-center max-w-[1440px] mx-auto p-4 ">
+        <div className="w-[100%] bg-white flex justify-center items-center max-w-[1440px] mx-auto p-4 ">
           <Image
             quality={100}
             sizes="(min-width: 768px) 100vw, 700px"
