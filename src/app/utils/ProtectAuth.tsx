@@ -1,29 +1,37 @@
 "use client";
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-// Use React.ComponentType to specify that the Component is a React component
-const Protected = (Component: React.ComponentType<any>) => {
-  // Use React.FC to specify the functional component type
+// ProtectAuth is a higher-order component that checks for authentication
+const ProtectAuth = (Component: React.ComponentType<any>) => {
+  // ProtectedComponent is the actual component that gets wrapped
   const ProtectedComponent: React.FC<any> = (props) => {
     const { currentUser, loading } = useAuth();
     const router = useRouter();
-    const pathname = usePathname();
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
-    useLayoutEffect(() => {
-      if (!currentUser && !loading) {
-        const queryString = `login?redirectTo=${encodeURIComponent(pathname)}`;
+    useEffect(() => {
+      setIsRedirecting(true); // Set redirect state to true while redirecting
 
-        const url = `/${queryString}`;
-
-        router.replace(url);
+      try {
+        // If there is a currentUser, redirect to the home page
+        if (currentUser) {
+          const url = `/`;
+          router.replace(url); // Redirect user
+        }
+      } catch (error) {
+        toast.error(`Unknown error occured`);
+      } finally {
+        setIsRedirecting(false);
       }
-    }, [currentUser, router, pathname, loading]);
+    }, [currentUser, router]);
 
-    if (loading) {
+    // Show the loading spinner initially until the authentication state is checked
+    if (loading || isRedirecting) {
       return (
-        <div className=" w-[100%] h-[100%] m-auto min-h-[100vh] flex justify-center pt-[2rem]">
+        <div className="w-[100%] h-[100%] bg-white m-auto min-h-[100vh] flex justify-center pt-[2rem]">
           <svg
             width="57"
             height="57"
@@ -100,11 +108,11 @@ const Protected = (Component: React.ComponentType<any>) => {
       );
     }
 
-    // Render the passed-in Component with currentUser and other props
+    // If not redirecting, render the wrapped component with currentUser and other props
     return <Component currentUser={currentUser} {...props} />;
   };
 
   return ProtectedComponent;
 };
 
-export default Protected;
+export default ProtectAuth;

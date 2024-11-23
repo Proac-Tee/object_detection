@@ -4,7 +4,7 @@ import React, {
   createContext,
   ReactNode,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 
@@ -31,6 +31,7 @@ interface UserData {
 type AuthContextProps = {
   currentUser: any;
   loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   signup: (email: string, password: string) => Promise<any>; // Update the type accordingly
   login: (email: string, password: string) => Promise<any>; // Update the type accordingly
   logout: any;
@@ -63,7 +64,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const [dropdownId, setDropdownId] = useState<string>("");
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [imageKey, setImageKey] = useState<string>("");
   const [modalId, setModalId] = useState<string>("");
 
@@ -99,9 +100,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return updateEmail(currentUser, email);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const unSubscriber = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
+      setCurrentUser(user || null);
       setLoading(false);
     });
     return unSubscriber;
@@ -114,6 +115,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     resetPassword,
     loading,
+    setLoading,
     updateuserProfile,
     dropdownId,
     setDropdownId,

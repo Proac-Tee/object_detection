@@ -1,7 +1,10 @@
+"use client";
+
 import Login from "@/components/Auth/Login";
 import Image from "next/image";
 import React, { Suspense } from "react";
 import loading_image from "../assets/loading.svg";
+import ProtectAuth from "../utils/ProtectAuth";
 
 const LoginPage = () => {
   return (
@@ -32,4 +35,4 @@ const LoginWrapper = () => {
   );
 };
 
-export default LoginPage;
+export default ProtectAuth(LoginPage);
