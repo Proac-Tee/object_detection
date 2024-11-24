@@ -1,7 +1,7 @@
 "use client";
 import { InferenceSession, Tensor } from "onnxruntime-web";
 import { round } from "lodash";
-import { RefObject, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useEffect } from "react";
 import * as runModelUtils from "../app/utils/runModel";
 import ObjectDetectionCamera from "./ObjectDetectionCamera";
@@ -10,9 +10,9 @@ import ndarray from "ndarray";
 import ops from "ndarray-ops";
 import Loading from "./Loading";
 import toast from "react-hot-toast";
-import html2canvas from "html2canvas";
 import { captureScreenshot } from "@/app/utils/captureScreenshot";
 import { uploadFiles } from "@/app/utils/upload";
+import { useAuth } from "@/app/context/AuthContext";
 
 // Define a type for the model resolution and name mapping
 type ModelResolution = [number[], string];
@@ -20,6 +20,7 @@ type ModelResolution = [number[], string];
 const RES_TO_MODEL: ModelResolution[] = [
   [[256, 256], "yolov10n.onnx"],
   [[320, 320], "yolov7-tiny_320x320.onnx"],
+  // [[800, 800], "holding-hands.onnx"],
   [[640, 640], "yolov7-tiny_640x640.onnx"],
 ];
 
@@ -32,7 +33,8 @@ const Detection = (props: any) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const captureRef = useRef<HTMLDivElement>(null);
-  const [screenshot, setScreenshot] = useState<string | null>(null);
+
+  const { alertClasses } = useAuth();
 
   const handleCapture = async () => {
     try {
@@ -208,11 +210,19 @@ const Detection = (props: any) => {
         modelResolution,
         tensor,
         conf2color,
-        handleCapture
+        handleCapture,
+        alertClasses
       );
       return;
     }
-    postprocessYolov7(ctx, modelResolution, tensor, conf2color, handleCapture);
+    postprocessYolov7(
+      ctx,
+      modelResolution,
+      tensor,
+      conf2color,
+      handleCapture,
+      alertClasses
+    );
   };
 
   if (!session || loading) {
@@ -237,19 +247,20 @@ const Detection = (props: any) => {
 };
 
 export default Detection;
+
 function postprocessYolov10(
   ctx: CanvasRenderingContext2D,
   modelResolution: number[],
   tensor: Tensor,
   conf2color: (conf: number) => string,
-  handleCapture: () => void
+  handleCapture: () => void,
+  alertClasses: string | string[]
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  const alertClasses = ["cell phone", "car", "knife"];
   let x0, y0, x1, y1, cls_id;
 
   let score: string | number | bigint;
@@ -308,14 +319,14 @@ function postprocessYolov7(
   modelResolution: number[],
   tensor: Tensor,
   conf2color: (conf: number) => string,
-  handleCapture: () => void
+  handleCapture: () => void,
+  alertClasses: string | string[]
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  const alertClasses = ["cell phone", "car", "knife"];
   let batch_id, x0, y0, x1, y1, cls_id, score;
   for (let i = 0; i < tensor.dims[0]; i++) {
     [batch_id, x0, y0, x1, y1, cls_id, score] = tensor.data.slice(

@@ -20,6 +20,7 @@ export async function runModel(
     const end = Date.now();
     const inferenceTime = end - start;
     const output = outputData[model.outputNames[0]];
+
     return [output, inferenceTime];
   } catch (e) {
     toast.error("Unknown Error occured");

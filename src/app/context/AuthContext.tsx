@@ -43,6 +43,8 @@ type AuthContextProps = {
   setImageKey: React.Dispatch<React.SetStateAction<string>>;
   modalId: string;
   setModalId: React.Dispatch<React.SetStateAction<string>>;
+  alertClasses: string[];
+  setAlertClasses: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -67,6 +69,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [imageKey, setImageKey] = useState<string>("");
   const [modalId, setModalId] = useState<string>("");
+
+  // State to hold the list of selected classes
+  const [alertClasses, setAlertClasses] = useState<string[]>([""]);
 
   //   user login function
   const login = (email: string, password: string) => {
@@ -123,6 +128,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setImageKey,
     modalId,
     setModalId,
+    alertClasses,
+    setAlertClasses,
   };
 
   return (

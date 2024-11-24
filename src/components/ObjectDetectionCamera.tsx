@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import { InferenceSession, Tensor } from "onnxruntime-web";
 import * as runModelUtils from "../app/utils/runModel";
 import Loading from "./Loading";
+import ClassSelector from "@/app/utils/ClassSelector";
 
 const ObjectDetectionCamera = (props: {
   width: number;
@@ -195,12 +196,13 @@ const ObjectDetectionCamera = (props: {
               //on hover, shift the button up
               className={`
               p-2  border-dashed border-2 rounded-xl hover:translate-y-1 w-[100%] sm:w-fit
-              ${liveDetection.current ? "bg-white text-black" : ""}
+              ${liveDetection.current ? "bg-green-300 text-black" : ""}
               
               `}
             >
               Live Detection
             </button>
+            <ClassSelector />
           </div>
           <div className="flex flex-wrap w-[100%] justify-center gap-1">
             <button
