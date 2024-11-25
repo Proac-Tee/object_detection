@@ -20,7 +20,7 @@ type ModelResolution = [number[], string];
 const RES_TO_MODEL: ModelResolution[] = [
   [[256, 256], "yolov10n.onnx"],
   [[320, 320], "yolov7-tiny_320x320.onnx"],
-  // [[800, 800], "holding-hands.onnx"],
+  [[640, 640], "holding-hands.onnx"],
   [[640, 640], "yolov7-tiny_640x640.onnx"],
 ];
 
@@ -204,7 +204,7 @@ const Detection = (props: any) => {
   ) => {
     // Output tensor of yolov7-tiny is [det_num, 7] while yolov10n is [1, all_boxes, 6]
     // Thus we need to handle them differently
-    if (modelName === "yolov10n.onnx") {
+    if (modelName === "yolov10n.onnx" || modelName === "holding-hands.onnx") {
       postprocessYolov10(
         ctx,
         modelResolution,
