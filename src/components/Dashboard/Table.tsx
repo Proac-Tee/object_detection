@@ -24,8 +24,11 @@ const Table: FC<DashboardProps> = ({ page, per_page }) => {
 
   let displayName: string = "";
 
-  if (currentUser && currentUser.displayName) {
+  let email: string = "";
+
+  if (currentUser && currentUser.displayName && currentUser.email) {
     displayName = currentUser.displayName.split(" ")[0].trim() || "";
+    email = currentUser.email;
   }
 
   // Fetch files data

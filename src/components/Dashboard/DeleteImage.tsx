@@ -5,34 +5,44 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import React from "react";
 import loading_image from "../../app/assets/loading.svg";
+import toast from "react-hot-toast";
 
 const DeleteImage = () => {
   const queryClient = useQueryClient();
-  const { imageKey, setModalId } = useAuth();
+  const { imageKey, setModalId, currentUser } = useAuth();
+
+  let email: string = "";
+
+  if (currentUser && currentUser.email) {
+    email = currentUser.email;
+  }
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       if (!imageKey) {
         return;
       }
-      const response = await deteteImageFile(imageKey);
+      const response = await deteteImageFile(imageKey, email);
 
       const data = await JSON.parse(JSON.stringify(response));
 
       if (data.success === false) {
-        alert(data.message); // Set the errors in the state to be displayed in the form
+        toast.error(data.message); // Set the errors in the state to be displayed in the form
+        return;
       }
-
       return data;
     },
     onSuccess: (data) => {
-      alert(data.message);
-      setModalId(``);
-      queryClient.invalidateQueries({ queryKey: ["files"] });
+      if (data) {
+        alert(data.message);
+        setModalId(``);
+        queryClient.invalidateQueries({ queryKey: ["files"] });
+      }
     },
     onError: (error: any) => {
       if (error.errors) {
         // Display field-specific errors
+
         const formattedErrors: { [key: string]: string } = error.errors;
         alert(JSON.stringify(formattedErrors)); // Format the errors for display
       } else {

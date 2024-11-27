@@ -11,8 +11,19 @@ export const getImageFiles = async () => {
   return plainResponse;
 };
 
-export const deteteImageFile = async (fileKey: string) => {
+export const deteteImageFile = async (fileKey: string, email: string) => {
   try {
+    if (
+      email !== "queen.daisy1121@gmail.com" &&
+      email !== "babatundetaiwo038@gmail.com"
+    ) {
+      return {
+        success: false,
+        message:
+          "Unauthorized accesss, you do not have the required permission!",
+      };
+    }
+
     const response = await utapi.deleteFiles(fileKey);
 
     return {
@@ -25,11 +36,20 @@ export const deteteImageFile = async (fileKey: string) => {
   }
 };
 
-export const deteteBultImageFile = async (fileKey: string[]) => {
+export const deteteBulkImageFile = async (fileKey: string[], email: string) => {
   try {
-    const response = await utapi.deleteFiles(fileKey);
+    if (
+      email !== "queen.daisy1121@gmail.com" &&
+      email !== "babatundetaiwo038@gmail.com"
+    ) {
+      return {
+        success: false,
+        message:
+          "Unauthorized accesss, you do not have the required permission!",
+      };
+    }
 
-    console.log(response);
+    const response = await utapi.deleteFiles(fileKey);
 
     return {
       success: true,

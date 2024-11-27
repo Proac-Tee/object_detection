@@ -1,35 +1,49 @@
 "use client";
-import { deteteBultImageFile } from "@/app/action/action";
+import { deteteBulkImageFile } from "@/app/action/action";
 import { useAuth } from "@/app/context/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import React from "react";
 import loading_image from "../../app/assets/loading.svg";
+import toast from "react-hot-toast";
 
 const DeleteBulkImage = () => {
   const queryClient = useQueryClient();
-  const { selectedItems, setSelectedItems, setModalId } = useAuth();
+  const { selectedItems, setSelectedItems, setModalId, currentUser } =
+    useAuth();
+
+  let email: string = "";
+
+  if (currentUser && currentUser.email) {
+    email = currentUser.email;
+  }
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       if (!selectedItems) {
         return;
       }
-      const response = await deteteBultImageFile(Array.from(selectedItems));
+      const response = await deteteBulkImageFile(
+        Array.from(selectedItems),
+        email
+      );
 
       const data = await JSON.parse(JSON.stringify(response));
 
       if (data.success === false) {
-        alert(data.message); // Set the errors in the state to be displayed in the form
+        toast.error(data.message); // Set the errors in the state to be displayed in the form
+        return;
       }
 
       return data;
     },
     onSuccess: (data) => {
-      alert(data.message);
-      setModalId(``);
-      queryClient.invalidateQueries({ queryKey: ["files"] });
-      setSelectedItems(new Set());
+      if (data) {
+        alert(data.message);
+        setModalId(``);
+        queryClient.invalidateQueries({ queryKey: ["files"] });
+        setSelectedItems(new Set());
+      }
     },
     onError: (error: any) => {
       if (error.errors) {
