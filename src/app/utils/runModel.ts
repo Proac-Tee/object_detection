@@ -21,8 +21,6 @@ export async function runModel(
     const inferenceTime = end - start;
     const output = outputData[model.outputNames[0]];
 
-    console.log(output);
-
     return [output, inferenceTime];
   } catch (e) {
     toast.error("Unknown Error occured");

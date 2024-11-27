@@ -47,6 +47,10 @@ type AuthContextProps = {
   setAlertClasses: React.Dispatch<React.SetStateAction<string[]>>;
   lastDetectionTime: number;
   setLastDetectionTime: React.Dispatch<React.SetStateAction<number>>;
+  isProcessing: boolean;
+  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedItems: Set<string>;
+  setSelectedItems: React.Dispatch<React.SetStateAction<Set<string>>>;
 };
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -72,9 +76,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [imageKey, setImageKey] = useState<string>("");
   const [modalId, setModalId] = useState<string>("");
   const [lastDetectionTime, setLastDetectionTime] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false); // Flag to prevent multiple uploads
 
   // State to hold the list of selected classes
   const [alertClasses, setAlertClasses] = useState<string[]>([""]);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   //   user login function
   const login = (email: string, password: string) => {
@@ -135,6 +141,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setAlertClasses,
     lastDetectionTime,
     setLastDetectionTime,
+    isProcessing,
+    setIsProcessing,
+    selectedItems,
+    setSelectedItems,
   };
 
   return (

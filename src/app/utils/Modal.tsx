@@ -3,6 +3,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import Image from "next/image";
 import React from "react";
 import DeleteImage from "../../components/Dashboard/DeleteImage";
+import DeleteBulkImage from "@/components/Dashboard/DeleteBulkImage";
 
 const Modal = () => {
   const { imageKey, modalId, setModalId } = useAuth();
@@ -29,6 +30,8 @@ const Modal = () => {
         );
       case "deleteImage":
         return <DeleteImage />;
+      case "deleteBulkImage":
+        return <DeleteBulkImage />;
       default:
         return null;
     }

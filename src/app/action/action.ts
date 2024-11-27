@@ -24,3 +24,19 @@ export const deteteImageFile = async (fileKey: string) => {
     return { success: false, message: "Failed to delete image", error };
   }
 };
+
+export const deteteBultImageFile = async (fileKey: string[]) => {
+  try {
+    const response = await utapi.deleteFiles(fileKey);
+
+    console.log(response);
+
+    return {
+      success: true,
+      message: "Images deleted successfully!",
+      data: JSON.parse(JSON.stringify(response)),
+    };
+  } catch (error) {
+    return { success: false, message: "Failed to delete image", error };
+  }
+};

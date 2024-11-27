@@ -31,29 +31,53 @@ const Detection = (props: any) => {
   const [modelName, setModelName] = useState<string>(RES_TO_MODEL[0][1]);
   const [session, setSession] = useState<InferenceSession | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const currentTime = Date.now();
 
   const captureRef = useRef<HTMLDivElement>(null);
 
-  const { alertClasses, lastDetectionTime, setLastDetectionTime } = useAuth();
+  const { alertClasses } = useAuth();
 
-  const handleCapture = async () => {
+  let isCapturing = false; // Flag to track if a capture is in progress
+  let lastCaptureTime = 0; // Timestamp of the last capture
+  let hasCaptured = false;
+
+  const handleCapture = async (word: string) => {
+    const currentTime = Date.now(); // Get the current timestamp
+
+    // If a capture is already in progress or within the 15 seconds window, do nothing
+    if (isCapturing || currentTime - lastCaptureTime < 15000) {
+      return;
+    }
+
     try {
+      // Mark capturing as in progress
+      isCapturing = true;
+
       // Capture the screenshot
       const dataURL = await captureScreenshot(captureRef);
       if (!dataURL) {
-        toast.success("Failed to capture screenshot.");
+        toast.error("Failed to capture screenshot.");
         return;
       }
 
       // Convert the Data URL to a File
       const file = dataURLtoFile(dataURL, "screenshot.png");
 
-      // Upload the file
-      const response = await uploadFiles("imageUploader", { files: [file] });
-      toast.success("Anormaly captured successfully");
+      // Update the last capture time
+      lastCaptureTime = currentTime;
+
+      // Optional: Upload the file
+      await uploadFiles("imageUploader", { files: [file] });
+
+      // Mark as captured to allow readOutAlert
+      hasCaptured = true;
+
+      toast.success("Anomaly captured successfully");
+      readOutAlert(word);
     } catch (error) {
-      toast.error(`Error during anormaly capture`);
+      toast.error("Error during anomaly capture");
+    } finally {
+      // Mark capturing as finished (reset lock)
+      isCapturing = false;
     }
   };
 
@@ -213,9 +237,7 @@ const Detection = (props: any) => {
         conf2color,
         handleCapture,
         alertClasses,
-        currentTime,
-        lastDetectionTime,
-        setLastDetectionTime
+        hasCaptured
       );
       return;
     }
@@ -226,9 +248,7 @@ const Detection = (props: any) => {
       conf2color,
       handleCapture,
       alertClasses,
-      currentTime,
-      lastDetectionTime,
-      setLastDetectionTime
+      hasCaptured
     );
   };
 
@@ -260,11 +280,9 @@ function postprocessYolov10(
   modelResolution: number[],
   tensor: Tensor,
   conf2color: (conf: number) => string,
-  handleCapture: () => void,
+  handleCapture: (word: string) => void,
   alertClasses: string | string[],
-  currentTime: number,
-  lastDetectionTime: number,
-  setLastDetectionTime: React.Dispatch<React.SetStateAction<number>>
+  hasCaptured: boolean
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
@@ -299,19 +317,12 @@ function postprocessYolov10(
       score.toString() +
       "%";
 
-    console.log(yoloClasses[cls_id]);
+    const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
 
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
-      if (currentTime - lastDetectionTime >= 10000) {
-        setLastDetectionTime(currentTime); // Update cooldown time
-
-        // Log the detected class and confidence score
-        const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
-        // Run handleCapture and readOutAlert together
-        Promise.allSettled([
-          handleCapture(), // Asynchronous screenshot capture
-          readOutAlert(word), // Asynchronous alert
-        ]);
+      // If capture hasn't occurred yet, capture and allow read aloud
+      if (!hasCaptured) {
+        handleCapture(word); // Capture screenshot
       }
     }
 
@@ -335,11 +346,9 @@ function postprocessYolov7(
   modelResolution: number[],
   tensor: Tensor,
   conf2color: (conf: number) => string,
-  handleCapture: () => void,
+  handleCapture: (word: string) => void,
   alertClasses: string | string[],
-  currentTime: number,
-  lastDetectionTime: number,
-  setLastDetectionTime: React.Dispatch<React.SetStateAction<number>>
+  hasCaptured: boolean
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
@@ -371,17 +380,12 @@ function postprocessYolov7(
 
     console.log(yoloClasses[cls_id]);
 
-    if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
-      if (currentTime - lastDetectionTime >= 10000) {
-        setLastDetectionTime(currentTime); // Update cooldown time
+    const word = `Detected an anomaly of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
 
-        // Log the detected class and confidence score
-        const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
-        // Run handleCapture and readOutAlert together
-        Promise.allSettled([
-          handleCapture(), // Asynchronous screenshot capture
-          readOutAlert(word), // Asynchronous alert
-        ]);
+    if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
+      // If capture hasn't occurred yet, capture and allow read aloud
+      if (!hasCaptured) {
+        handleCapture(word); // Capture screenshot
       }
     }
 
