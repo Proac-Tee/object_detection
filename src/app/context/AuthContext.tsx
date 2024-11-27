@@ -45,6 +45,8 @@ type AuthContextProps = {
   setModalId: React.Dispatch<React.SetStateAction<string>>;
   alertClasses: string[];
   setAlertClasses: React.Dispatch<React.SetStateAction<string[]>>;
+  lastDetectionTime: number;
+  setLastDetectionTime: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -69,6 +71,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [imageKey, setImageKey] = useState<string>("");
   const [modalId, setModalId] = useState<string>("");
+  const [lastDetectionTime, setLastDetectionTime] = useState<number>(0);
 
   // State to hold the list of selected classes
   const [alertClasses, setAlertClasses] = useState<string[]>([""]);
@@ -130,6 +133,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setModalId,
     alertClasses,
     setAlertClasses,
+    lastDetectionTime,
+    setLastDetectionTime,
   };
 
   return (

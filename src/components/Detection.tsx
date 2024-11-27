@@ -31,10 +31,11 @@ const Detection = (props: any) => {
   const [modelName, setModelName] = useState<string>(RES_TO_MODEL[0][1]);
   const [session, setSession] = useState<InferenceSession | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const currentTime = Date.now();
 
   const captureRef = useRef<HTMLDivElement>(null);
 
-  const { alertClasses } = useAuth();
+  const { alertClasses, lastDetectionTime, setLastDetectionTime } = useAuth();
 
   const handleCapture = async () => {
     try {
@@ -211,7 +212,10 @@ const Detection = (props: any) => {
         tensor,
         conf2color,
         handleCapture,
-        alertClasses
+        alertClasses,
+        currentTime,
+        lastDetectionTime,
+        setLastDetectionTime
       );
       return;
     }
@@ -221,7 +225,10 @@ const Detection = (props: any) => {
       tensor,
       conf2color,
       handleCapture,
-      alertClasses
+      alertClasses,
+      currentTime,
+      lastDetectionTime,
+      setLastDetectionTime
     );
   };
 
@@ -254,7 +261,10 @@ function postprocessYolov10(
   tensor: Tensor,
   conf2color: (conf: number) => string,
   handleCapture: () => void,
-  alertClasses: string | string[]
+  alertClasses: string | string[],
+  currentTime: number,
+  lastDetectionTime: number,
+  setLastDetectionTime: React.Dispatch<React.SetStateAction<number>>
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
@@ -292,13 +302,17 @@ function postprocessYolov10(
     console.log(yoloClasses[cls_id]);
 
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
-      // Log the detected class and confidence score
-      const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
-      // Run handleCapture and readOutAlert together
-      Promise.allSettled([
-        handleCapture(), // Asynchronous screenshot capture
-        readOutAlert(word), // Asynchronous alert
-      ]);
+      if (currentTime - lastDetectionTime >= 10000) {
+        setLastDetectionTime(currentTime); // Update cooldown time
+
+        // Log the detected class and confidence score
+        const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
+        // Run handleCapture and readOutAlert together
+        Promise.allSettled([
+          handleCapture(), // Asynchronous screenshot capture
+          readOutAlert(word), // Asynchronous alert
+        ]);
+      }
     }
 
     const color = conf2color(score / 100);
@@ -322,7 +336,10 @@ function postprocessYolov7(
   tensor: Tensor,
   conf2color: (conf: number) => string,
   handleCapture: () => void,
-  alertClasses: string | string[]
+  alertClasses: string | string[],
+  currentTime: number,
+  lastDetectionTime: number,
+  setLastDetectionTime: React.Dispatch<React.SetStateAction<number>>
 ) {
   const dx = ctx.canvas.width / modelResolution[0];
   const dy = ctx.canvas.height / modelResolution[1];
@@ -355,13 +372,17 @@ function postprocessYolov7(
     console.log(yoloClasses[cls_id]);
 
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
-      // Log the detected class and confidence score
-      const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
-      // Run handleCapture and readOutAlert together
-      Promise.allSettled([
-        handleCapture(), // Asynchronous screenshot capture
-        readOutAlert(word), // Asynchronous alert
-      ]);
+      if (currentTime - lastDetectionTime >= 10000) {
+        setLastDetectionTime(currentTime); // Update cooldown time
+
+        // Log the detected class and confidence score
+        const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
+        // Run handleCapture and readOutAlert together
+        Promise.allSettled([
+          handleCapture(), // Asynchronous screenshot capture
+          readOutAlert(word), // Asynchronous alert
+        ]);
+      }
     }
 
     const color = conf2color(score / 100);
