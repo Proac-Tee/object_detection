@@ -289,6 +289,8 @@ function postprocessYolov10(
       score.toString() +
       "%";
 
+    console.log(yoloClasses[cls_id]);
+
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
       // Log the detected class and confidence score
       const word = `Detected an anormally of a ${yoloClasses[cls_id]} class with a confidence score of ${score}%`;
@@ -349,6 +351,8 @@ function postprocessYolov7(
       " " +
       score.toString() +
       "%";
+
+    console.log(yoloClasses[cls_id]);
 
     if (score >= 50 && alertClasses.includes(yoloClasses[cls_id])) {
       // Log the detected class and confidence score
